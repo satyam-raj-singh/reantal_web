@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RentEase - Smart Rental &amp; Equipment Booking Platform</title>
+    <meta name="description" content="Professional rental and equipment booking platform with mathematical date-conflict detection, real-time availability calendar, and admin inventory management." />
+    <meta property="og:title" content="RentEase - Smart Rental &amp; Equipment Booking Platform" />
+    <meta property="og:description" content="Professional rental and equipment booking platform with mathematical date-conflict detection, real-time availability calendar, and admin inventory management." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts & Stylesheet -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="./css/style.css" />
+
+    <!-- Lucide Icons & Chart.js CDNs -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <!-- Top Navigation Bar (Strict 3-Zone Contract) -->
+    <header class="topbar">
+      <div class="topbar-container">
+        <!-- Zone 1: Single text element wordmark -->
+        <a href="#home" class="brand-wordmark" data-view="home">
+          <div class="brand-icon">
+            <i data-lucide="layers"></i>
+          </div>
+          <span>RentEase</span>
+        </a>
+
+        <!-- Zone 2: Navigation Links -->
+        <nav class="nav-links">
+          <a href="#home" class="nav-link nav-link-active" data-view="home">Home</a>
+          <a href="#equipment" class="nav-link" data-view="equipment">Equipment</a>
+          <a href="#my-rentals" class="nav-link" data-view="my-rentals">My Rentals</a>
+          <a href="#calendar" class="nav-link" data-view="calendar">Calendar</a>
+          <a href="#about" class="nav-link" data-view="about">About</a>
+
+          <!-- Admin Portal Links (Shown when logged in as admin) -->
+          <div id="nav-admin-group" class="hidden flex items-center gap-4">
+            <div class="nav-admin-separator"></div>
+            <a href="#admin-dashboard" class="nav-link text-blue-700 font-semibold" data-view="admin-dashboard">Admin Hub</a>
+            <a href="#admin-equipment" class="nav-link" data-view="admin-equipment">Inventory</a>
+            <a href="#admin-bookings" class="nav-link" data-view="admin-bookings">Bookings</a>
+            <a href="#admin-reports" class="nav-link" data-view="admin-reports">Reports</a>
+          </div>
+        </nav>
+
+        <!-- Zone 3: Role Switcher & User Profile Actions -->
+        <div class="topbar-actions">
+          <div id="nav-user-badge" onclick="window.RentEaseApp.openAuthModal()" title="Click to switch role (Customer / Admin)">
+            <!-- Rendered dynamically by updateNavbarUser() -->
+          </div>
+          <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle Navigation Menu">
+            <i data-lucide="menu"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mobile Dropdown Menu -->
+      <div id="mobile-menu" class="mobile-nav-menu hidden">
+        <a href="#home" class="mobile-nav-link" data-view="home">Home</a>
+        <a href="#equipment" class="mobile-nav-link" data-view="equipment">Equipment Catalog</a>
+        <a href="#my-rentals" class="mobile-nav-link" data-view="my-rentals">My Rentals</a>
+        <a href="#calendar" class="mobile-nav-link" data-view="calendar">Availability Calendar</a>
+        <a href="#about" class="mobile-nav-link" data-view="about">About Platform</a>
+        <div class="border-t border-slate-200 my-1"></div>
+        <a href="#admin-dashboard" class="mobile-nav-link text-blue-700 font-semibold" data-view="admin-dashboard">Admin Dashboard</a>
+        <a href="#admin-equipment" class="mobile-nav-link" data-view="admin-equipment">Equipment Inventory</a>
+        <a href="#admin-bookings" class="mobile-nav-link" data-view="admin-bookings">Booking Management</a>
+        <a href="#admin-reports" class="mobile-nav-link" data-view="admin-reports">Analytics &amp; Reports</a>
+      </div>
+    </header>
+
+    <!-- Main Dynamic View Container -->
+    <main id="main-content" role="main"></main>
+
+    <!-- Professional SaaS Footer -->
+    <footer class="app-footer">
+      <div class="footer-container">
+        <div>
+          <strong class="text-slate-800">RentEase</strong> &middot; Smart Rental &amp; Equipment Booking Platform
+          <p class="text-xs text-slate-500 mt-0.5">Built with pure HTML5, CSS3, Vanilla JS &amp; LocalStorage &middot; Zero double bookings guaranteed.</p>
+        </div>
+
+        <div class="footer-links">
+          <a href="#home" class="footer-link" data-view="home">Home</a>
+          <a href="#equipment" class="footer-link" data-view="equipment">Equipment</a>
+          <a href="#calendar" class="footer-link" data-view="calendar">Calendar</a>
+          <a href="#my-rentals" class="footer-link" data-view="my-rentals">My Rentals</a>
+          <a href="#about" class="footer-link" data-view="about">Formula Specs</a>
+          <button class="btn btn-xs btn-outline ml-2" onclick="window.RentEaseApp.openAuthModal()">
+            <i data-lucide="shuffle"></i>
+            <span>Switch Role</span>
+          </button>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+    <!-- MODAL 1: EQUIPMENT DETAILS MODAL -->
+    <div id="details-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="details-modal-title">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title" id="details-modal-title">Equipment Specifications</h3>
+          <button class="modal-close-btn" onclick="window.RentEaseApp.closeModal('details-modal')">&times;</button>
+        </div>
+        <div id="details-modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- MODAL 2: BOOKING MODAL WITH REAL-TIME CONFLICT DETECTOR -->
+    <div id="booking-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title" id="booking-modal-title">Book Equipment</h3>
+          <button class="modal-close-btn" onclick="window.RentEaseApp.closeModal('booking-modal')">&times;</button>
+        </div>
+        <div id="booking-modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- MODAL 3: BOOKING CONFIRMATION SUCCESS MODAL -->
+    <div id="confirmation-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card max-w-lg">
+        <div class="modal-header">
+          <h3 class="modal-title">Confirmation</h3>
+          <button class="modal-close-btn" onclick="window.RentEaseApp.closeModal('confirmation-modal')">&times;</button>
+        </div>
+        <div id="confirmation-modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- MODAL 4: ADMIN ADD/EDIT EQUIPMENT MODAL -->
+    <div id="add-edit-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 class="modal-title" id="add-edit-modal-title">Equipment Details</h3>
+          <button class="modal-close-btn" onclick="window.RentEaseApp.closeModal('add-edit-modal')">&times;</button>
+        </div>
+        <div id="add-edit-modal-body" class="modal-body"></div>
+      </div>
+    </div>
+
+    <!-- MODAL 5: DEMO LOGIN / ROLE SWITCHER MODAL -->
+    <div id="auth-modal" class="modal-overlay hidden" role="dialog" aria-modal="true">
+      <div class="modal-card max-w-md">
+        <div class="modal-header">
+          <h3 class="modal-title">Demo Authentication</h3>
+          <button class="modal-close-btn" onclick="window.RentEaseApp.closeModal('auth-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="text-sm text-slate-600 mb-4">
+            Select a demo profile to test both the <strong>Customer</strong> rental experience and the <strong>Admin</strong> operations portal:
+          </p>
+
+          <div class="grid grid-cols-2 gap-3 mb-5">
+            <button id="quick-login-customer" class="btn btn-outline flex-col py-3 px-2 text-center h-auto">
+              <i data-lucide="user" class="w-6 h-6 text-blue-600 mb-1"></i>
+              <span class="font-bold text-xs">Customer Mode</span>
+              <span class="text-slate-400 text-xs mt-0.5">customer@rentease.com</span>
+            </button>
+
+            <button id="quick-login-admin" class="btn btn-outline flex-col py-3 px-2 text-center h-auto">
+              <i data-lucide="shield-check" class="w-6 h-6 text-purple-600 mb-1"></i>
+              <span class="font-bold text-xs">Admin Mode</span>
+              <span class="text-slate-400 text-xs mt-0.5">admin@rentease.com</span>
+            </button>
+          </div>
+
+          <div class="relative flex py-2 items-center">
+            <div class="flex-grow border-t border-slate-200"></div>
+            <span class="flex-shrink mx-3 text-slate-400 text-xs">Or Sign In with Credentials</span>
+            <div class="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <form id="demo-login-form" class="space-y-3 mt-3">
+            <div class="form-group">
+              <label class="form-label" for="login-email">Email Address</label>
+              <input type="email" id="login-email" class="form-input" required value="customer@rentease.com" />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">Password</label>
+              <input type="password" id="login-password" class="form-input" required value="customer123" />
+            </div>
+            <button type="submit" class="btn btn-primary w-full mt-2">
+              <span>Sign In</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client-side Application Scripts (Strictly No Backend) -->
+    <script src="./js/utils.js"></script>
+    <script src="./js/data.js"></script>
+    <script src="./js/storage.js"></script>
+    <script src="./js/booking.js"></script>
+    <script src="./js/calendar.js"></script>
+    <script src="./js/admin.js"></script>
+    <script src="./js/app.js"></script>
+  </body>
+</html>

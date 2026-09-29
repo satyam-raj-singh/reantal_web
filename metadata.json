@@ -1,0 +1,6 @@
+{
+  "name": "RentEase - Smart Rental & Equipment Booking Platform",
+  "description": "Professional rental and equipment booking platform with mathematical date-conflict detection, real-time availability calendar, and admin inventory management.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
